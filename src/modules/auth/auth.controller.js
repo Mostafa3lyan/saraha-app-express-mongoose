@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { signup } from "./auth.service.js";
+import { login, signup } from "./auth.service.js";
 import { successResponse } from "./../../common/utils/response/success.response.js";
 const router = Router();
+
+// signup
 router.post("/signup", async (req, res, next) => {
   const user = await signup(req.body);
   return successResponse({
@@ -9,6 +11,16 @@ router.post("/signup", async (req, res, next) => {
       status: 201,
     res,
     data: {user},
+  });
+});
+
+// login
+router.post("/login", async (req, res, next) => {
+  const user = await login(req.body);
+  return successResponse({
+    message: "logged in successfully",
+    res,
+    data: { user },
   });
 });
 

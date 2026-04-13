@@ -7,7 +7,7 @@ import {
   successResponse,
 } from "./common/utils/index.js";
 
-import { authenticationDB } from "./DB/connection.db.js";
+import { authenticationDB } from "./DB/index.js";
 import { authRouter, userRouter } from "./modules/index.js";
 import express from "express";
 
