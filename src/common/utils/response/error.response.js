@@ -1,0 +1,74 @@
+import { NODE_ENV } from "../../../../config/config.service.js";
+
+export const globalErrorHandling = (error, req, res, next) => {
+  const status = error.cause?.status || error.status || 500;
+
+  return res.status(status).json({
+    success: false,
+    message:
+      status === 500
+        ? "Internal Server Error"
+        : error.message || "Something went wrong",
+
+    ...(process.env.NODE_ENV === "development" && {
+      stack: error.stack,
+      error,
+    }),
+  });
+};
+
+export const ErrorException = ({
+  message = "fail",
+  status = 400,
+  extra = undefined,
+}) => {
+  throw new Error(message, { cause: { status, extra } });
+};
+
+export const BadRequestException = ({
+  message = "bad request",
+  status = 400,
+  extra = undefined,
+}) => {
+  return ErrorException({ message, status, extra });
+};
+
+export const UnauthorizedException = ({
+  message = "unauthorized",
+  status = 401,
+  extra = undefined,
+}) => {
+  return ErrorException({ message, status, extra });
+};
+
+export const ForbiddenException = ({
+  message = "forbidden",
+  status = 403,
+  extra = undefined,
+}) => {
+  return ErrorException({ message, status, extra });
+};
+
+export const NotFoundException = ({
+  message = "not found",
+  status = 404,
+  extra = undefined,
+}) => {
+  return ErrorException({ message, status, extra });
+};
+
+export const ConflictException = ({
+  message = "conflict",
+  status = 409,
+  extra = undefined,
+}) => {
+  return ErrorException({ message, status, extra });
+};
+
+export const ServerException = ({
+  message = "server error",
+  status = 500,
+  extra = undefined,
+}) => {
+  return ErrorException({ message, status, extra });
+};
