@@ -1,8 +1,6 @@
 import { HashApproachEnum } from "../../common/enums/security.enum.js";
-import {
-  compareHash,
-  generateHash,
-} from "../../common/utils/security/hash.security.js";
+import { generateHash, compareHash,generateEncryption, generateDecryption } from "../../common/utils/security/index.js";
+
 import { createOne, findOne, UserModel } from "../../DB/index.js";
 import {
   ConflictException,
@@ -26,7 +24,7 @@ export const signup = async (inputs) => {
       fullName,
       email,
       password: await generateHash({ plainText: password }),
-      phone,
+      phone: await generateEncryption({ plainText: phone }),
     },
   });
   return user;
@@ -53,5 +51,6 @@ export const login = async (inputs) => {
     throw UnauthorizedException({ message: "Email or Password is incorrect" });
   }
 
+  user.phone = generateDecryption(user.phone);
   return user;
 };
