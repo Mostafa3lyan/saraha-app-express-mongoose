@@ -1,7 +1,3 @@
-// db.repository.js - Generic database operations using Mongoose models
-// Provides reusable functions for common CRUD operations with flexible options
-
-
 /**
  * Finds a single document by its _id.
  * Supports optional field selection, population of referenced docs, and lean mode.
@@ -126,6 +122,20 @@ export const paginate = async ({
  */
 export const create = async ({ data, options, model }) => {
   return (await model.create(data, options)) || [];
+};
+
+/**
+ * Creates and saves a single document using new model() + save().
+ * Unlike create(), this gives you access to the document instance before saving,
+ * which is useful for calling instance methods or setting virtual fields first.
+ * Triggers all pre/post save middleware.
+ * @param {Object} data - Document fields to set
+ * @param {Object} options - Options passed to doc.save() (e.g. { validateBeforeSave: false })
+ * @param {Object} model - Mongoose model to instantiate
+ */
+export const createOne = async ({ data, options, model } = {}) => {
+  const doc = new model(data);
+  return await doc.save(options);
 };
 
 /**
@@ -376,4 +386,58 @@ export const bulkWrite = async ({ operations, options, model } = {}) => {
  */
 export const distinct = async ({ field, filter, model } = {}) => {
   return await model.distinct(field, filter || {});
+};
+
+/**
+ * Replaces the entire first document matching the filter with a new one.
+ * Unlike updateOne(), this removes all existing fields and substitutes the full document.
+ * The _id field is preserved. Returns a write result with matchedCount and modifiedCount.
+ * Use findOneAndReplace() instead if you need the resulting document returned.
+ * @param {Object} filter - Conditions to match the target document
+ * @param {Object} replacement - The full replacement document (no update operators)
+ * @param {Object} options - Additional Mongoose options
+ * @param {Object} model - Mongoose model to replace in
+ */
+export const replaceOne = async ({
+  filter,
+  replacement,
+  options,
+  model,
+} = {}) => {
+  return await model.replaceOne(filter || {}, replacement || {}, options);
+};
+
+/**
+ * Finds the first document matching the filter, replaces it entirely, and returns it.
+ * Unlike findOneAndUpdate(), this swaps the whole document instead of merging fields.
+ * The _id field is preserved. Returns the resulting document by default (new: true).
+ * Returns null if no matching document is found.
+ * @param {Object} filter - Conditions to match the target document
+ * @param {Object} replacement - The full replacement document (no update operators)
+ * @param {Object} options - Mongoose options (default: { new: true, runValidators: true })
+ * @param {Object} model - Mongoose model to replace in
+ */
+export const findOneAndReplace = async ({
+  filter,
+  replacement,
+  options = { new: true, runValidators: true },
+  model,
+} = {}) => {
+  return await model.findOneAndReplace(
+    filter || {},
+    replacement || {},
+    options,
+  );
+};
+
+/**
+ * Returns a fast estimated count of all documents in the collection.
+ * Uses collection metadata instead of scanning documents, so it is much faster
+ * than countDocuments() on large collections but does NOT support filters.
+ * Use countDocuments() when you need a filtered or exact count.
+ * @param {Object} options - Additional Mongoose options
+ * @param {Object} model - Mongoose model to count from
+ */
+export const estimatedDocumentCount = async ({ options, model } = {}) => {
+  return await model.estimatedDocumentCount(options);
 };

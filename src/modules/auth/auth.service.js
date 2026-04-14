@@ -1,4 +1,9 @@
-import { findOne, UserModel } from "../../DB/index.js";
+import { HashApproachEnum } from "../../common/enums/security.enum.js";
+import {
+  compareHash,
+  generateHash,
+} from "../../common/utils/security/hash.security.js";
+import { createOne, findOne, UserModel } from "../../DB/index.js";
 import {
   ConflictException,
   UnauthorizedException,
@@ -17,7 +22,12 @@ export const signup = async (inputs) => {
 
   const user = await createOne({
     model: UserModel,
-    data: { fullName, email, password, phone },
+    data: {
+      fullName,
+      email,
+      password: await generateHash({ plainText: password }),
+      phone,
+    },
   });
   return user;
 };
@@ -27,10 +37,19 @@ export const login = async (inputs) => {
 
   const user = await findOne({
     model: UserModel,
-      filter: { email, password },
-    options : { lean: true },
+    filter: { email },
   });
   if (!user) {
+    throw UnauthorizedException({ message: "Email or Password is incorrect" });
+  }
+
+  const match = await compareHash({
+    plainText: password,
+    cipherText: user.password,
+    approach: HashApproachEnum.bcrypt,
+  });
+
+  if (!match) {
     throw UnauthorizedException({ message: "Email or Password is incorrect" });
   }
 
