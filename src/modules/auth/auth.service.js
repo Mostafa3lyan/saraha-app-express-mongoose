@@ -1,5 +1,5 @@
 import { HashApproachEnum } from "../../common/enums/security.enum.js";
-import { generateHash, compareHash,generateEncryption, generateDecryption } from "../../common/utils/security/index.js";
+import { compareHash, createLoginCredentials, generateEncryption, generateHash } from "../../common/utils/security/index.js";
 
 import { createOne, findOne, UserModel } from "../../DB/index.js";
 import {
@@ -30,7 +30,7 @@ export const signup = async (inputs) => {
   return user;
 };
 
-export const login = async (inputs) => {
+export const login = async (inputs, issuer) => {
   const { email, password } = inputs;
 
   const user = await findOne({
@@ -51,6 +51,5 @@ export const login = async (inputs) => {
     throw UnauthorizedException({ message: "Email or Password is incorrect" });
   }
 
-  user.phone = generateDecryption(user.phone);
-  return user;
+return createLoginCredentials(user, issuer)
 };

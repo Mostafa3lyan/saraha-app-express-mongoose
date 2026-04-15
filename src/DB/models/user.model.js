@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { GenderEnum, ProviderEnum } from "../../common/enums/index.js";
+import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enums/index.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -39,6 +39,12 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(ProviderEnum),
       default: ProviderEnum.System,
     },
+    role: {
+      type: Number,
+      enum: Object.values(RoleEnum),
+      default: RoleEnum.User,
+    },
+    
   },
   {
     timestamps: true,

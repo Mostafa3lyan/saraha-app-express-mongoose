@@ -16,11 +16,11 @@ router.post("/signup", async (req, res, next) => {
 
 // login
 router.post("/login", async (req, res, next) => {
-  const user = await login(req.body);
+  const credentials = await login(req.body, `${req.protocol}://${req.host}`);
   return successResponse({
     message: "logged in successfully",
     res,
-    data: { user },
+    data: { credentials },
   });
 });
 
