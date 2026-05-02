@@ -1,5 +1,4 @@
 import Joi from "joi";
-// import { generalValidationFields } from "../../common/utils/validation.js";
 import { generalValidationFields } from './../../common/utils/index.js';
 
 

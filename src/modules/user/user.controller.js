@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { profile, rotateToken } from "./user.service.js";
+import { profile, rotateToken, shareProfile } from "./user.service.js";
 import { successResponse } from "./../../common/utils/response/index.js";
 import { authentication, authorization } from "../../middleware/index.js";
 import { TokenTypeEnum } from "../../common/enums/security.enum.js";
 import { RoleEnum } from "../../common/enums/user.enum.js";
+import * as validators from "./user.validation.js"
+import { validation } from "../../middleware/validation.middleware.js";
 const router = Router();
 
 // User Profile
@@ -16,6 +18,18 @@ router.get(
     return successResponse({
       res,
       data: { user },
+    });
+  },
+);
+
+router.get(
+  "/:userId/share-profile",
+  validation(validators.shareProfile),
+  async (req, res, next) => {
+    const account = await shareProfile(req.params.userId);
+    return successResponse({
+      res,
+      data: { account },
     });
   },
 );
