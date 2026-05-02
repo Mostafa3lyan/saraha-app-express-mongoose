@@ -135,21 +135,3 @@ export const loginWithGmail = async (idToken, issuer) => {
   }
   return createLoginCredentials(user, issuer);
 };
-
-
-// {
-//   iss: 'https://accounts.google.com',
-//   azp: '316381827166-m19cnn4mpl7ln562ubvbiq2cvocjkuni.apps.googleusercontent.com',
-//   aud: '316381827166-m19cnn4mpl7ln562ubvbiq2cvocjkuni.apps.googleusercontent.com',
-//   sub: '110433618588318955903',
-//   email: 'mostafaelyan99@gmail.com',
-//   email_verified: true,
-//   nbf: 1776298361,
-//   name: 'Mostafa Elyan',
-//   picture: 'https://lh3.googleusercontent.com/a/ACg8ocKf22ngO6CU6f2icKXOYsHvVabX06nIAsm6VKvrT7omTpGTsrUa=s96-c',
-//   given_name: 'Mostafa',
-//   family_name: 'Elyan',
-//   iat: 1776298661,
-//   exp: 1776302261,
-//   jti: '411a954e9231c288889b236b226c121409bb5275'
-// }

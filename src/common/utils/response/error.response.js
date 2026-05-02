@@ -1,7 +1,7 @@
 import { NODE_ENV } from "../../../../config/config.service.js";
 
 export const globalErrorHandling = (error, req, res, next) => {
-  const status = error.cause?.status || error.status || 500;
+  const status = error.status || error.cause?.status || 500;
 
   return res.status(status).json({
     success: false,
@@ -10,9 +10,9 @@ export const globalErrorHandling = (error, req, res, next) => {
         ? "Internal Server Error"
         : error.message || "Something went wrong",
 
-    ...(process.env.NODE_ENV === "development" && {
+    ...(NODE_ENV === "development" && {
+      error: error.extra ?? error.cause?.extra ?? {},
       stack: error.stack,
-      error,
     }),
   });
 };
@@ -22,7 +22,10 @@ export const ErrorException = ({
   status = 400,
   extra = undefined,
 }) => {
-  throw new Error(message, { cause: { status, extra } });
+  const error = new Error(message);
+  error.status = status;
+  error.extra = extra;
+  return error;
 };
 
 export const BadRequestException = ({

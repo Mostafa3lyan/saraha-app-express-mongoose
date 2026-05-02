@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { login, signup, signupWithGmail } from "./auth.service.js";
 import { successResponse } from "./../../common/utils/response/success.response.js";
+import * as validators from "./auth.validation.js";
+import { validation } from "../../middleware/validation.middleware.js";
 const router = Router();
 
 // signup
-router.post("/signup", async (req, res, next) => {
+router.post("/signup", validation(validators.signupSchema), async (req, res, next) => {
   const user = await signup(req.body);
   return successResponse({
     message: "signed up successfully",
@@ -29,7 +31,7 @@ router.post("/signup/gmail", async (req, res, next) => {
 });
 
 // login
-router.post("/login", async (req, res, next) => {
+router.post("/login", validation(validators.loginSchema), async (req, res, next) => {
   const credentials = await login(req.body, `${req.protocol}://${req.host}`);
   return successResponse({
     message: "logged in successfully",
