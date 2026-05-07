@@ -19,11 +19,14 @@ export const authentication = (tokenType = TokenTypeEnum.access) => {
       const token = authHeader.split(" ")[1];
       req.token = token;
 
-      req.user = await decodeToken({
+      const {user, decoded} = await decodeToken({
         token,
         tokenType,
       });
 
+      req.user = user;
+      req.decoded = decoded;
+      
       next();
     } catch (error) {
       next(error);

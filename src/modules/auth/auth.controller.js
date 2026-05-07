@@ -36,7 +36,7 @@ router.post("/login", validation(validators.loginSchema), async (req, res, next)
   return successResponse({
     message: "logged in successfully",
     res,
-    data: { credentials },
+    data: { ...credentials },
   });
 });
 

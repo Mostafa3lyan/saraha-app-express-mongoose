@@ -1,3 +1,4 @@
+import { GOOGLE_CLIENT_ID } from "../../../config/config.service.js";
 import { HashApproachEnum } from "../../common/enums/security.enum.js";
 import { ProviderEnum } from "../../common/enums/user.enum.js";
 import {
@@ -68,8 +69,7 @@ export const login = async (inputs, issuer) => {
 // verify google token
 const verifyGoogleToken = async (idToken) => {
   const client = new OAuth2Client();
-  const WEB_CLIENT_ID =
-    "316381827166-m19cnn4mpl7ln562ubvbiq2cvocjkuni.apps.googleusercontent.com";
+  const WEB_CLIENT_ID = GOOGLE_CLIENT_ID;
   const ticket = await client.verifyIdToken({
     idToken,
     audience: WEB_CLIENT_ID, // Specify the WEB_CLIENT_ID of the app that accesses the backend

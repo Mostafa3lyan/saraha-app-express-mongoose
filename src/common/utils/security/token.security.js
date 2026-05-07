@@ -13,9 +13,12 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
+  UnauthorizedException,
 } from "../response/error.response.js";
 import { TokenTypeEnum } from "../../enums/security.enum.js";
 import { RoleEnum } from "../../enums/user.enum.js";
+import { randomUUID } from 'node:crypto';
+import TokenModel from "../../../DB/models/token.model.js";
 
 export const generateToken = ({
   payload = {},
@@ -88,6 +91,10 @@ export const decodeToken = async ({
     });
   }
 
+  if (decoded.jti && await findOne({ model: TokenModel, filter: { jti: decoded.jti } })) {
+    throw UnauthorizedException({ message: "Invalid login session" });
+  }
+
   const secretKey = getSignature({ tokenType: tokenApproach, level });
 
   const verifiedData = verifyToken({
@@ -104,7 +111,11 @@ export const decodeToken = async ({
     throw NotFoundException({ message: "No registered account" });
   }
 
-  return user;
+  if (user.changeCredentialsTime && user.changeCredentialsTime?.getTime() >= decoded.iat * 1000) {
+    throw UnauthorizedException({ message: "Invalid login session" });
+  }
+
+  return {user, decoded};
 };
 
 export const createLoginCredentials = (user, issuer) => {
@@ -113,6 +124,7 @@ export const createLoginCredentials = (user, issuer) => {
     user.role,
   );
 
+  const jwtid = randomUUID();
   const access_token = generateToken({
     payload,
     secretKey: accessSignature,
@@ -120,6 +132,7 @@ export const createLoginCredentials = (user, issuer) => {
       issuer,
       audience: [TokenTypeEnum.access, user.role],
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+      jwtid,
     },
   });
 
@@ -130,6 +143,7 @@ export const createLoginCredentials = (user, issuer) => {
       issuer,
       audience: [TokenTypeEnum.refresh, user.role],
       expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+      jwtid,
     },
   });
 

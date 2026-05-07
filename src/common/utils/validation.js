@@ -34,4 +34,20 @@ export const generalValidationFields = {
       ? true
       : helper.message("invalid objectId");
   }),
+
+  file: function (validation = []) {
+    return Joi.object().keys({
+      fieldname: Joi.string().required(),
+      originalname: Joi.string().required(),
+      encoding: Joi.string().required(),
+      mimetype: Joi.string()
+        .valid(...Object.values(validation))
+        .required(),
+      finalPath: Joi.string().required(),
+      destination: Joi.string().required(),
+      filename: Joi.string().required(),
+      path: Joi.string().required(),
+      size: Joi.number().required(),
+    });
+  },
 };
