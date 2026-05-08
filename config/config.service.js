@@ -7,13 +7,17 @@ const envPath = {
   development: `.env.development`,
   production: `.env.production`,
 };
-console.log({ en: envPath[NODE_ENV] });
+console.log({ env: envPath[NODE_ENV] });
 
 config({ path: resolve(`./config/${envPath[NODE_ENV]}`) });
 
 export const port = process.env.PORT ?? 7000;
 
+// DB Uri
 export const DB_URI = process.env.DB_URI;
+
+// Redis Uri
+export const REDIS_URI = process.env.REDIS_URI
 
 export const SALT_ROUND = parseInt(process.env.SALT_ROUND ?? "10");
 export const IV_LENGTH = parseInt(process.env.IV_LENGTH ?? "16");

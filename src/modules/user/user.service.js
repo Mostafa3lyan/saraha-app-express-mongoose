@@ -1,5 +1,15 @@
-import { ACCESS_TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js";
+import {
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+} from "../../../config/config.service.js";
 import { LogoutEnum, TokenTypeEnum } from "../../common/enums/security.enum.js";
+import {
+  baseRevokeTokenKey,
+  del,
+  keys,
+  revokeTokenKey,
+  set,
+} from "../../common/services/redis.service.js";
 import {
   ConflictException,
   generateDecryption,
@@ -13,32 +23,39 @@ import { createOne, deleteMany, findOne } from "../../DB/db.repository.js";
 import { UserModel } from "../../DB/index.js";
 import TokenModel from "../../DB/models/token.model.js";
 
+const createRevokeToken = async ({ userId, jti, ttl }) => {
+  await set(
+    revokeTokenKey({ userId: sub, jti }),
+    jti,
+    iat + REFRESH_TOKEN_EXPIRES_IN,
+  );
+  return;
+};
+
 export const profile = async (user) => {
   return user;
 };
 
-export const logout = async ({ flag }, user, { jti, iat }) => {
+export const logout = async ({ flag }, user, { jti, iat, sub }) => {
   let status = 200;
   switch (flag) {
     case LogoutEnum.all:
       user.changeCredentialsTime = new Date();
       await user.save();
-        await deleteMany({ model: TokenModel, filter: { userId: user._id } });
+      await del(await keys(baseRevokeTokenKey(sub)));
       break;
 
     default:
-      await createOne({
-        model: TokenModel,
-        data: {
-          userId: user._id,
-          jti,
-          expiresIn: new Date((iat + REFRESH_TOKEN_EXPIRES_IN) * 1000),
-        },
+      await createRevokeToken({
+        userId: sub,
+        jti,
+        ttl: iat + REFRESH_TOKEN_EXPIRES_IN,
       });
+
       status = 201;
       break;
   }
-
+  revokeTokenKey;
   return status;
 };
 
@@ -60,21 +77,17 @@ export const shareProfile = async (userId) => {
   return account;
 };
 
-export const rotateToken = async (user, { jti, iat }, issuer) => {
-
-  if ((iat + ACCESS_TOKEN_EXPIRES_IN) * 1000 > Date.now() + (30000)) {
+export const rotateToken = async (user, { sub, jti, iat }, issuer) => {
+  if ((iat + ACCESS_TOKEN_EXPIRES_IN) * 1000 > Date.now() + 30000) {
     throw ConflictException({ message: " Current Access token still valid" });
   }
 
-        await createOne({
-          model: TokenModel,
-          data: {
-            userId: user._id,
-            jti,
-            expiresIn: new Date((iat + REFRESH_TOKEN_EXPIRES_IN) * 1000),
-          },
-        });
-  
+  await createRevokeToken({
+    userId: sub,
+    jti,
+    ttl: iat + REFRESH_TOKEN_EXPIRES_IN,
+  });
+
   return createLoginCredentials(user, issuer);
 };
 

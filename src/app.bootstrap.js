@@ -1,4 +1,4 @@
-import {port } from "../config/config.service.js";
+import { port } from "../config/config.service.js";
 import {
   ConflictException,
   ErrorException,
@@ -7,12 +7,11 @@ import {
   successResponse,
 } from "./common/utils/index.js";
 
-import { authenticationDB } from "./DB/index.js";
-import { authRouter, userRouter } from "./modules/index.js";
-import express from "express";
 import cors from "cors";
-import { resolve } from 'node:path';
-
+import express from "express";
+import { resolve } from "node:path";
+import { authenticationDB, connectRedis } from "./DB/index.js";
+import { authRouter, userRouter } from "./modules/index.js";
 
 async function bootstrap() {
   const app = express();
@@ -22,6 +21,9 @@ async function bootstrap() {
 
   // DB
   await authenticationDB();
+
+  // Redis_DB
+  await connectRedis();
 
   //application routing
   app.get("/", (req, res) => res.send("Hello World!"));
@@ -42,6 +44,6 @@ async function bootstrap() {
   app.use(NotFoundException);
   app.use(ConflictException);
 
-  app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+  app.listen(port, () => console.log(`Saraha app listening on port ${port}!`));
 }
 export default bootstrap;
