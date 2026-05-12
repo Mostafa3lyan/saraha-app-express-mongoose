@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema(
       required: function () {
         return this.provider === ProviderEnum.System;
       },
-      select: false,
     },
     phone: String,
     confirmEmail: Date,
@@ -32,6 +31,7 @@ const userSchema = new mongoose.Schema(
     changeCredentialsTime: Date,
     profilePicture: String,
     profileCoverPictures: [String],
+    oldPasswords: [String],
 
     gender: {
       type: Number,

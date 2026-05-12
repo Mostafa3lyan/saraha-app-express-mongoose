@@ -42,3 +42,16 @@ export const profileAttachments = {
     })
     .required(),
 };
+
+export const changePasswordSchema = {
+  body: Joi.object()
+    .keys({
+      oldPassword: generalValidationFields.password.required(),
+      newPassword: generalValidationFields.password.not(Joi.ref("oldPassword")).required(),
+      confirmNewPassword: generalValidationFields
+        .confirmPassword("newPassword")
+        .required()
+        .messages({ "any.only": "Confirm password does not match" }),
+    })
+    .required(),
+};

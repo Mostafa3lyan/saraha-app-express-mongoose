@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  changePassword,
   logout,
   profile,
   profileCoverImage,
@@ -23,7 +24,7 @@ router.get(
   authentication(),
   // authorization([RoleEnum.User, RoleEnum.Admin]),
   async (req, res, next) => {
-    const user = await profile(req.user);
+    const user = await profile(req.user);    
     return successResponse({
       res,
       data: { user },
@@ -97,6 +98,19 @@ router.patch(
   async (req, res, next) => {
     const account = await profileCoverImage(req.files, req.user);
     return successResponse({ res, data: { account } });
+  },
+);
+
+router.patch(
+  "/change-password",
+  authentication(),
+  validation(validators.changePasswordSchema),
+  async (req, res, next) => {
+    const credentials = await changePassword(req.body, req.user, `${req.protocol}://${req.host}`);
+    return successResponse({
+      res,
+      data: { ...credentials },
+    });
   },
 );
 

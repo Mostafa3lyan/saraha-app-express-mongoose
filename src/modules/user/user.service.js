@@ -11,14 +11,17 @@ import {
   set,
 } from "../../common/services/redis.service.js";
 import {
+  BadRequestException,
+  compareHash,
   ConflictException,
   generateDecryption,
+  generateHash,
   NotFoundException,
 } from "../../common/utils/index.js";
 import {
   createLoginCredentials
 } from "../../common/utils/security/token.security.js";
-import { findOne } from "../../DB/db.repository.js";
+import { findById, findOne } from "../../DB/db.repository.js";
 import { UserModel } from "../../DB/index.js";
 
 const createRevokeToken = async ({ userId, jti, ttl }) => {
@@ -100,3 +103,35 @@ export const profileCoverImage = async (files, user) => {
   await user.save();
   return user;
 };
+
+
+// change password
+export const changePassword = async ({ oldPassword, newPassword }, user, issuer) => {
+
+  const match = await compareHash({
+    plainText: oldPassword,
+    cipherText: user.password,
+  });
+
+  if (!match) {
+    throw BadRequestException({ message: "Old password is incorrect" });
+  }
+
+  for (const hash of user.oldPasswords || []) {
+    const isMatch = await compareHash({
+      plainText: newPassword,
+      cipherText: hash,
+    });
+    if (isMatch) {
+      throw BadRequestException({ message: "New password cannot be the same as any of the previous passwords" });
+    }
+  }
+
+  user.oldPasswords.push(user.password);
+  user.password = await generateHash({ plainText: newPassword });
+  user.changeCredentialsTime = new Date();
+  await user.save();
+
+  await del(await keys(baseRevokeTokenKey(user._id)));
+  return await createLoginCredentials(user, issuer);
+}
