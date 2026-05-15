@@ -12,7 +12,7 @@ import cors from "cors";
 import express from "express";
 import { resolve } from "node:path";
 import { authenticationDB, connectRedis } from "./DB/index.js";
-import { authRouter, userRouter } from "./modules/index.js";
+import { authRouter, messageRouter, userRouter } from "./modules/index.js";
 
 async function bootstrap() {
   const app = express();
@@ -30,6 +30,7 @@ async function bootstrap() {
   app.get("/", (req, res) => res.send("Hello World!"));
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
+  app.use("/message", messageRouter);
 
   //invalid routing
   app.use("{/*dummy}", (req, res) => {
